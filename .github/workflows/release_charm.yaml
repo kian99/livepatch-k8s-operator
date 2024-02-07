@@ -30,4 +30,3 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           channel: "latest/edge"
           pull-image: "false"
-          tag-prefix: "k8s"
