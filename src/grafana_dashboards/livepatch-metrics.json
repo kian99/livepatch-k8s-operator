@@ -433,7 +433,7 @@
             "editorMode": "code",
             "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{}[$__rate_interval])) by (handler, method, code) ",
             "interval": "",
-            "intervalFactor": 10,
+            "intervalFactor": 1,
             "legendFormat": "{{code}} - {{handler}} - {{method}}",
             "range": true,
             "refId": "A"
