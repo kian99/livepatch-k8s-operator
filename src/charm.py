@@ -39,7 +39,6 @@ ON_PREM_REQUIRED_SETTINGS: t.Dict[str, str] = {}
 
 class DeferError(Exception):
     """An exception that indicates the event should be deferred."""
-    pass
 
 
 class LivepatchCharm(CharmBase):
