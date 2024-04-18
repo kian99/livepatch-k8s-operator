@@ -100,7 +100,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\", code=\"200\"}[$__rate_interval])) by (code)",
+            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{code=\"200\"}[$__rate_interval])) by (code)",
             "interval": "",
             "legendFormat": "{{code}}",
             "range": true,
@@ -170,7 +170,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\", code=\"204\"}[$__rate_interval])) by (code)",
+            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{code=\"204\"}[$__rate_interval])) by (code)",
             "interval": "",
             "legendFormat": "{{code}}",
             "range": true,
@@ -228,7 +228,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\", code=\"401\"}[$__rate_interval])) by (code)",
+            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{code=\"401\"}[$__rate_interval])) by (code)",
             "interval": "",
             "legendFormat": "{{code}}",
             "range": true,
@@ -294,7 +294,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\", code=\"403\"}[$__rate_interval])) by (code)",
+            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{code=\"403\"}[$__rate_interval])) by (code)",
             "interval": "",
             "legendFormat": "{{code}}",
             "range": true,
@@ -364,7 +364,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\", code=\"404\"}[$__rate_interval])) by (code)",
+            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{code=\"404\"}[$__rate_interval])) by (code)",
             "interval": "",
             "legendFormat": "{{code}}",
             "range": true,
@@ -431,7 +431,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval])) by (handler, method, code) ",
+            "expr": "sum(rate(livepatch_server_http_request_duration_seconds_count{}[$__rate_interval])) by (handler, method, code) ",
             "interval": "",
             "intervalFactor": 10,
             "legendFormat": "{{code}} - {{handler}} - {{method}}",
@@ -542,7 +542,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(increase(livepatch_server_database_error_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval]))",
+            "expr": "sum(increase(livepatch_server_database_error_count{}[$__rate_interval]))",
             "interval": "",
             "legendFormat": "",
             "range": true,
@@ -711,7 +711,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_http_request_duration_seconds_bucket{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\", handler=~\"/v1/client/.*\"}[$__rate_interval]\n        )\n    ) by (le, handler,code)\n)",
+            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_http_request_duration_seconds_bucket{handler=~\"/v1/client/.*\"}[$__rate_interval]\n        )\n    ) by (le, handler,code)\n)",
             "interval": "",
             "legendFormat": "",
             "range": true,
@@ -814,7 +814,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_database_query_duration_seconds_bucket{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\", method!~\"^KPI.*\"}[$__rate_interval]\n        )\n    ) by (le, method)\n)",
+            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_database_query_duration_seconds_bucket{method!~\"^KPI.*\"}[$__rate_interval]\n        )\n    ) by (le, method)\n)",
             "interval": "",
             "legendFormat": "{{method}}",
             "range": true,
@@ -944,7 +944,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_http_auth_duration_seconds_bucket{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval]\n        )\n    ) by (le, token_type)\n)",
+            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_http_auth_duration_seconds_bucket{}[$__rate_interval]\n        )\n    ) by (le, token_type)\n)",
             "interval": "",
             "legendFormat": "{{token_type}}",
             "range": true,
@@ -1039,7 +1039,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_database_query_duration_seconds_bucket{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\", method=~\"^KPI.*$\"}[$__rate_interval]\n        )\n    ) by (le, method)\n)",
+            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_database_query_duration_seconds_bucket{method=~\"^KPI.*$\"}[$__rate_interval]\n        )\n    ) by (le, method)\n)",
             "interval": "",
             "legendFormat": "{{method}}",
             "range": true,
@@ -1132,7 +1132,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(increase(livepatch_server_http_authorizer_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[24h])) by (token)",
+            "expr": "sum(increase(livepatch_server_http_authorizer_count{}[24h])) by (token)",
             "format": "time_series",
             "instant": false,
             "interval": "86400",
@@ -1253,7 +1253,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(increase(livepatch_server_contracts_error_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval]))",
+            "expr": "sum(increase(livepatch_server_contracts_error_count{}[$__rate_interval]))",
             "interval": "",
             "legendFormat": "client errors",
             "range": true,
@@ -1346,7 +1346,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(rate(livepatch_server_contracts_error_reported_count{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval])) by (code)",
+            "expr": "sum(rate(livepatch_server_contracts_error_reported_count{}[$__rate_interval])) by (code)",
             "interval": "",
             "legendFormat": "{{code}}",
             "range": true,
@@ -1465,7 +1465,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(increase(livepatch_server_patch_cache_hits{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval]))",
+            "expr": "sum(increase(livepatch_server_patch_cache_hits{}[$__rate_interval]))",
             "interval": "",
             "legendFormat": "Hits",
             "range": true,
@@ -1558,7 +1558,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(increase(livepatch_server_patch_cache_misses{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval]))",
+            "expr": "sum(increase(livepatch_server_patch_cache_misses{}[$__rate_interval]))",
             "interval": "",
             "legendFormat": "Misses",
             "range": true,
@@ -1651,7 +1651,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(increase(livepatch_server_patch_cache_evictions{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval]))",
+            "expr": "sum(increase(livepatch_server_patch_cache_evictions{}[$__rate_interval]))",
             "interval": "",
             "legendFormat": "Evictions",
             "range": true,
@@ -1744,7 +1744,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "livepatch_server_patch_cache_length{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}",
+            "expr": "livepatch_server_patch_cache_length{}",
             "interval": "",
             "legendFormat": "",
             "range": true,
@@ -1853,7 +1853,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(increase(livepatch_client_updates_with_unknown_kernel_total{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[60m]))",
+            "expr": "sum(increase(livepatch_client_updates_with_unknown_kernel_total{}[60m]))",
             "instant": false,
             "interval": "",
             "legendFormat": "",
@@ -1909,7 +1909,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(increase(livepatch_logging_kernels_error_total{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[60m]))",
+            "expr": "sum(increase(livepatch_logging_kernels_error_total{}[60m]))",
             "interval": "",
             "legendFormat": "",
             "range": true,
@@ -1965,7 +1965,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "sum(increase(livepatch_client_updates_without_build_date_total{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[60m]))",
+            "expr": "sum(increase(livepatch_client_updates_without_build_date_total{}[60m]))",
             "interval": "",
             "legendFormat": "",
             "range": true,
@@ -2056,7 +2056,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_http_request_duration_seconds_bucket{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval]\n        )\n    ) by (le, handler)\n)",
+            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_http_request_duration_seconds_bucket{}[$__rate_interval]\n        )\n    ) by (le, handler)\n)",
             "interval": "",
             "legendFormat": "",
             "range": true,
@@ -2148,7 +2148,7 @@
               "uid": "${prometheusds}"
             },
             "editorMode": "code",
-            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_database_query_duration_seconds_bucket{juju_model_uuid=~\"$juju_model_uuid\", juju_model=~\"$juju_model\",juju_application=~\"$juju_application\", juju_unit=~\"$juju_unit\"}[$__rate_interval]\n        )\n    ) by (le, method)\n)",
+            "expr": "histogram_quantile(\n    0.${Percentile}, \n    sum(\n        rate(\n            livepatch_server_database_query_duration_seconds_bucket{}[$__rate_interval]\n        )\n    ) by (le, method)\n)",
             "interval": "",
             "legendFormat": "",
             "range": true,
