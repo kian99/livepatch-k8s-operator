@@ -37,6 +37,10 @@ REQUIRED_SETTINGS = {
 ON_PREM_REQUIRED_SETTINGS: t.Dict[str, str] = {}
 
 
+class DeferError(Exception):
+    """An exception that indicates the event should be deferred."""
+
+
 class LivepatchCharm(CharmBase):
     """The livepatch k8s charm."""
 
@@ -108,13 +112,6 @@ class LivepatchCharm(CharmBase):
         # Grafana dashboard relation
         self._grafana_dashboards = GrafanaDashboardProvider(self, relation_name="grafana-dashboard")
 
-    def check_ready_state_and_defer(self, event):
-        """Check that the state is ready, and if not, defer the event."""
-        if not self._state.is_ready():
-            event.defer()
-            LOGGER.warning("State is not ready")
-            return
-
     def on_config_changed(self, event):
         """On config changed hook, which runs first."""
         self._update_workload_container_config(event)
@@ -160,29 +157,22 @@ class LivepatchCharm(CharmBase):
         if not dsn:
             LOGGER.info("waiting for PG connection string")
             self.unit.status = BlockedStatus("Waiting for postgres relation to be established.")
-            event.defer()
-            return
+            raise DeferError()
 
         schema_container = self.unit.get_container(SCHEMA_UPGRADE_CONTAINER)
         if not schema_container.can_connect():
             LOGGER.error("cannot connect to the schema update container")
             self.unit.status = WaitingStatus("Waiting to connect - schema container.")
-            event.defer()
-            return
+            raise DeferError
 
         upgrade_required = False
         try:
             upgrade_required = self.migration_is_required(schema_container, dsn)
         except Exception as e:
             LOGGER.error(f"Failed to determe if schema upgrade required: {e}")
-            self.unit.status = WaitingStatus("Unable to determine database readiness")
-            event.defer()
-            return
 
         if upgrade_required:
             self.schema_upgrade(schema_container, dsn)
-
-        return
 
     def get_env_vars(self) -> dict:
         """Map config to env vars and return a processed dict."""
@@ -209,12 +199,20 @@ class LivepatchCharm(CharmBase):
 
     def _update_workload_container_config(self, event):
         """Update workload with all available configuration data."""
-        self.check_ready_state_and_defer(event)
+        if not self._state.is_ready():
+            event.defer()
+            LOGGER.warning("State is not ready")
+            return
 
         # Quickly update logrotates config each workload update
         self._push_to_workload(LOGROTATE_CONFIG_PATH, self._get_logrotate_config(), event)
 
-        self.handle_schema_upgrade(event)
+        try:
+            self.handle_schema_upgrade(event)
+        except DeferError:
+            event.defer()
+            return
+
         # This token comes from an action rather than config so we check for it specifically.
         if not self.config.get("server.is-hosted"):
             if self._state.resource_token is None or self._state.resource_token:
@@ -295,7 +293,10 @@ class LivepatchCharm(CharmBase):
 
         once setup is complete a primary/standby may join / change in consequent events.
         """
-        self.check_ready_state_and_defer(event)
+        if not self._state.is_ready():
+            event.defer()
+            LOGGER.warning("State is not ready")
+            return
 
         LOGGER.info("(postgresql, legacy database relation) RELATION_JOINED event fired.")
 
@@ -320,7 +321,10 @@ class LivepatchCharm(CharmBase):
 
         The internal snap configuration is updated to reflect this.
         """
-        self.check_ready_state_and_defer(event)
+        if not self._state.is_ready():
+            event.defer()
+            LOGGER.warning("State is not ready")
+            return
 
         LOGGER.info("(postgresql, legacy database relation) MASTER_CHANGED event fired.")
 
@@ -371,7 +375,10 @@ class LivepatchCharm(CharmBase):
 
         LOGGER.info("(postgresql) RELATION_JOINED event fired.")
 
-        self.check_ready_state_and_defer(event)
+        if not self._state.is_ready():
+            event.defer()
+            LOGGER.warning("State is not ready")
+            return
 
         if self._is_legacy_database_relation_activated():
             LOGGER.error(f"The `{DATABASE_RELATION_LEGACY}` relation is already integrated.")
@@ -418,7 +425,10 @@ class LivepatchCharm(CharmBase):
 
     def schema_upgrade_action(self, event):
         """Run the schema upgrade action."""
-        self.check_ready_state_and_defer(event)
+        if not self._state.is_ready():
+            event.defer()
+            LOGGER.warning("State is not ready")
+            return
 
         db_uri = self._state.dsn
         container = self.unit.get_container(SCHEMA_UPGRADE_CONTAINER)
@@ -473,7 +483,10 @@ class LivepatchCharm(CharmBase):
 
     def schema_version_check_action(self, event):
         """Check schema version action."""
-        self.check_ready_state_and_defer(event)
+        if not self._state.is_ready():
+            event.defer()
+            LOGGER.warning("State is not ready")
+            return
 
         db_uri = self._state.dsn
         container = self.unit.get_container(SCHEMA_UPGRADE_CONTAINER)

@@ -1,6 +1,3 @@
-# Copyright 2024 Canonical Ltd.
-# Licensed under the Apache2.0. See LICENSE file in charm source for details.
-
 # Copyright 2021 Canonical Ltd.
 # See LICENSE file for licensing details.
 
@@ -222,7 +219,7 @@ LIBAPI = 0
 # Increment this PATCH version before using `charmcraft publish-lib` or reset
 # to 0 if you are raising the major API version
 
-LIBPATCH = 31
+LIBPATCH = 35
 
 logger = logging.getLogger(__name__)
 
@@ -417,8 +414,11 @@ class RelationInterfaceMismatchError(Exception):
         self.relation_name = relation_name
         self.expected_relation_interface = expected_relation_interface
         self.actual_relation_interface = actual_relation_interface
-        self.message = "The '{}' relation has '{}' as " "interface rather than the expected '{}'".format(
-            relation_name, actual_relation_interface, expected_relation_interface
+        self.message = (
+            "The '{}' relation has '{}' as "
+            "interface rather than the expected '{}'".format(
+                relation_name, actual_relation_interface, expected_relation_interface
+            )
         )
 
         super().__init__(self.message)
@@ -525,15 +525,21 @@ def _validate_relation_by_interface_and_direction(
     relation = charm.meta.relations[relation_name]
 
     actual_relation_interface = relation.interface_name
-    if actual_relation_interface != expected_relation_interface:
-        raise RelationInterfaceMismatchError(relation_name, expected_relation_interface, actual_relation_interface)
+    if actual_relation_interface and actual_relation_interface != expected_relation_interface:
+        raise RelationInterfaceMismatchError(
+            relation_name, expected_relation_interface, actual_relation_interface
+        )
 
     if expected_relation_role == RelationRole.provides:
         if relation_name not in charm.meta.provides:
-            raise RelationRoleMismatchError(relation_name, RelationRole.provides, RelationRole.requires)
+            raise RelationRoleMismatchError(
+                relation_name, RelationRole.provides, RelationRole.requires
+            )
     elif expected_relation_role == RelationRole.requires:
         if relation_name not in charm.meta.requires:
-            raise RelationRoleMismatchError(relation_name, RelationRole.requires, RelationRole.provides)
+            raise RelationRoleMismatchError(
+                relation_name, RelationRole.requires, RelationRole.provides
+            )
     else:
         raise Exception("Unexpected RelationDirection: {}".format(expected_relation_role))
 
@@ -595,7 +601,9 @@ def _convert_dashboard_fields(content: str, inject_dropdowns: bool = True) -> st
     return json.dumps(dict_content)
 
 
-def _replace_template_fields(dict_content: dict, datasources: dict, existing_templates: bool) -> dict:  # noqa: C901
+def _replace_template_fields(  # noqa: C901
+    dict_content: dict, datasources: dict, existing_templates: bool
+) -> dict:
     """Make templated fields get cleaned up afterwards.
 
     If existing datasource variables are present, try to substitute them.
@@ -657,14 +665,14 @@ def _template_panels(
             continue
         if not existing_templates:
             datasource = panel.get("datasource")
-            if type(datasource) == str:
+            if isinstance(datasource, str):
                 if "loki" in datasource:
                     panel["datasource"] = "${lokids}"
                 elif "grafana" in datasource:
                     continue
                 else:
                     panel["datasource"] = "${prometheusds}"
-            elif type(datasource) == dict:
+            elif isinstance(datasource, dict):
                 # In dashboards exported by Grafana 9, datasource type is dict
                 dstype = datasource.get("type", "")
                 if dstype == "loki":
@@ -678,7 +686,7 @@ def _template_panels(
                 logger.error("Unknown datasource format: skipping")
                 continue
         else:
-            if type(panel["datasource"]) == str:
+            if isinstance(panel["datasource"], str):
                 if panel["datasource"].lower() in replacements.values():
                     # Already a known template variable
                     continue
@@ -693,7 +701,7 @@ def _template_panels(
                 if replacement:
                     used_replacements.append(ds)
                 panel["datasource"] = replacement or panel["datasource"]
-            elif type(panel["datasource"]) == dict:
+            elif isinstance(panel["datasource"], dict):
                 dstype = panel["datasource"].get("type", "")
                 if panel["datasource"].get("uid", "").lower() in replacements.values():
                     # Already a known template variable
@@ -782,7 +790,7 @@ def _inject_labels(content: str, topology: dict, transformer: "CosTool") -> str:
 
     # We need to use an index so we can insert the changed element back later
     for panel_idx, panel in enumerate(panels):
-        if type(panel) is not dict:
+        if not isinstance(panel, dict):
             continue
 
         # Use the index to insert it back in the same location
@@ -823,11 +831,11 @@ def _modify_panel(panel: dict, topology: dict, transformer: "CosTool") -> dict:
         if "datasource" not in panel.keys():
             continue
 
-        if type(panel["datasource"]) == str:
+        if isinstance(panel["datasource"], str):
             if panel["datasource"] not in known_datasources:
                 continue
             querytype = known_datasources[panel["datasource"]]
-        elif type(panel["datasource"]) == dict:
+        elif isinstance(panel["datasource"], dict):
             if panel["datasource"]["uid"] not in known_datasources:
                 continue
             querytype = known_datasources[panel["datasource"]["uid"]]
@@ -1072,7 +1080,9 @@ class GrafanaDashboardProvider(Object):
         # it is predictable across units.
         id = "prog:{}".format(encoded_dashboard[-24:-16])
 
-        stored_dashboard_templates[id] = self._content_to_dashboard_object(encoded_dashboard, inject_dropdowns)
+        stored_dashboard_templates[id] = self._content_to_dashboard_object(
+            encoded_dashboard, inject_dropdowns
+        )
         stored_dashboard_templates[id]["dashboard_alt_uid"] = self._generate_alt_uid(id)
 
         if self._charm.unit.is_leader():
@@ -1100,7 +1110,9 @@ class GrafanaDashboardProvider(Object):
             for dashboard_relation in self._charm.model.relations[self._relation_name]:
                 self._upset_dashboards_on_relation(dashboard_relation)
 
-    def _update_all_dashboards_from_dir(self, _: Optional[HookEvent] = None, inject_dropdowns: bool = True) -> None:
+    def _update_all_dashboards_from_dir(
+        self, _: Optional[HookEvent] = None, inject_dropdowns: bool = True
+    ) -> None:
         """Scans the built-in dashboards and updates relations with changes."""
         # Update of storage must be done irrespective of leadership, so
         # that the stored state is there when this unit becomes leader.
@@ -1183,6 +1195,7 @@ class GrafanaDashboardProvider(Object):
                 `grafana_dashboaard` relationship is joined
         """
         if self._charm.unit.is_leader():
+            self._update_all_dashboards_from_dir()
             self._upset_dashboards_on_relation(event.relation)
 
     def _on_grafana_dashboard_relation_changed(self, event: RelationChangedEvent) -> None:
@@ -1202,7 +1215,9 @@ class GrafanaDashboardProvider(Object):
             if valid and not errors:
                 self.on.dashboard_status_changed.emit(valid=valid)  # pyright: ignore
             else:
-                self.on.dashboard_status_changed.emit(valid=valid, errors=errors)  # pyright: ignore
+                self.on.dashboard_status_changed.emit(  # pyright: ignore
+                    valid=valid, errors=errors
+                )
 
     def _upset_dashboards_on_relation(self, relation: Relation) -> None:
         """Update the dashboards in the relation data bucket."""
@@ -1317,7 +1332,8 @@ class GrafanaDashboardConsumer(Object):
         Returns: a list of known dashboards coming from the provided relation instance.
         """
         return [
-            self._to_external_object(relation_id, dashboard) for dashboard in self._get_stored_dashboards(relation_id)
+            self._to_external_object(relation_id, dashboard)
+            for dashboard in self._get_stored_dashboards(relation_id)
         ]
 
     def _on_grafana_dashboard_relation_changed(self, event: RelationChangedEvent) -> None:
@@ -1355,7 +1371,9 @@ class GrafanaDashboardConsumer(Object):
                 :class:`GrafanaDashboardConsumer` will be updated.
         """
         if self._charm.unit.is_leader():
-            relations = [relation] if relation else self._charm.model.relations[self._relation_name]
+            relations = (
+                [relation] if relation else self._charm.model.relations[self._relation_name]
+            )
 
             for relation in relations:
                 self._render_dashboards_and_signal_changed(relation)
@@ -1451,7 +1469,9 @@ class GrafanaDashboardConsumer(Object):
         if relation_has_invalid_dashboards:
             self._remove_all_dashboards_for_relation(relation)
 
-            invalid_templates = [data["original_id"] for data in rendered_dashboards if not data["valid"]]
+            invalid_templates = [
+                data["original_id"] for data in rendered_dashboards if not data["valid"]
+            ]
 
             logger.warning(
                 "Cannot add one or more Grafana dashboards from relation '{}:{}': the following "
@@ -1524,7 +1544,9 @@ class GrafanaDashboardConsumer(Object):
         """
         dashboards = []
 
-        for _, (relation_id, dashboards_for_relation) in enumerate(self.get_peer_data("dashboards").items()):
+        for _, (relation_id, dashboards_for_relation) in enumerate(
+            self.get_peer_data("dashboards").items()
+        ):
             for dashboard in dashboards_for_relation:
                 dashboards.append(self._to_external_object(relation_id, dashboard))
 
@@ -1633,7 +1655,9 @@ class GrafanaDashboardAggregator(Object):
         dashboards = self._handle_reactive_dashboards(event)
 
         if not dashboards:
-            logger.warning("Could not find dashboard data after a relation change for {}".format(event.app))
+            logger.warning(
+                "Could not find dashboard data after a relation change for {}".format(event.app)
+            )
             return
 
         for id in dashboards:
@@ -1779,7 +1803,9 @@ class GrafanaDashboardAggregator(Object):
             # Replace the old-style datasource templates
             dash = re.sub(r"<< datasource >>", r"${prometheusds}", dash)
             dash = re.sub(r'"datasource": "prom.*?"', r'"datasource": "${prometheusds}"', dash)
-            dash = re.sub(r'"datasource": "\$datasource"', r'"datasource": "${prometheusds}"', dash)
+            dash = re.sub(
+                r'"datasource": "\$datasource"', r'"datasource": "${prometheusds}"', dash
+            )
             dash = re.sub(r'"uid": "\$datasource"', r'"uid": "${prometheusds}"', dash)
             dash = re.sub(
                 r'"datasource": "(!?\w)[\w|\s|-]+?Juju generated.*?"',
@@ -1788,7 +1814,9 @@ class GrafanaDashboardAggregator(Object):
             )
 
             # Yank out "new"+old LMA topology
-            dash = re.sub(r'(,?\s?juju_application=~)\\"\$app\\"', r'\1\\"$juju_application\\"', dash)
+            dash = re.sub(
+                r'(,?\s?juju_application=~)\\"\$app\\"', r'\1\\"$juju_application\\"', dash
+            )
 
             # Replace old piechart panels
             dash = re.sub(r'"type": "grafana-piechart-panel"', '"type": "piechart"', dash)
@@ -1815,7 +1843,9 @@ class GrafanaDashboardAggregator(Object):
         dashboards_path = None
 
         try:
-            dashboards_path = _resolve_dir_against_charm_path(self._charm, "src/grafana_dashboards")
+            dashboards_path = _resolve_dir_against_charm_path(
+                self._charm, "src/grafana_dashboards"
+            )
         except InvalidDirectoryPathError as e:
             logger.warning(
                 "Invalid Grafana dashboards folder at %s: %s",
@@ -1946,7 +1976,12 @@ class CosTool:
         args = [str(self.path), "--format", type, "transform"]
 
         variable_topology = {k: "${}".format(k) for k in topology.keys()}
-        args.extend(["--label-matcher={}={}".format(key, value) for key, value in variable_topology.items()])
+        args.extend(
+            [
+                "--label-matcher={}={}".format(key, value)
+                for key, value in variable_topology.items()
+            ]
+        )
 
         # Pass a leading "--" so expressions with a negation or subtraction aren't interpreted as
         # flags
