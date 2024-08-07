@@ -3,6 +3,7 @@ name: Integration tests
 on:
   pull_request:
   workflow_call:
+  workflow_dispatch:
 
 jobs:
   integration-test-microk8s:
@@ -11,6 +12,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
 
       # To speed up the tests, we build the charm with Charmcraft and put the
       # `.charm` file in the repository root directory. Integration tests will
